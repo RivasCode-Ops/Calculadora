@@ -440,6 +440,14 @@
                     </select>
                 </div>
                 <div class="form-group">
+                    <label>Estratégia</label>
+                    <select id="estrategia">
+                        <option value="trocar">🔄 Trocar de veículo</option>
+                        <option value="manter">💰 Manter + Investir valor</option>
+                    </select>
+                    <span class="help-text">Compare trocar vs investir o valor do veículo</span>
+                </div>
+                <div class="form-group">
                     <label>Marca (FIPE)</label>
                     <select id="marcaFipe" disabled>
                         <option value="">Selecione...</option>
@@ -497,6 +505,12 @@
                     </select>
                 </div>
             </div>
+                <div class="form-group">
+                    <label>Taxa de Retorno Anual (%)</label>
+                    <input type="number" id="taxaInvestimento" value="12" min="0" max="30" step="0.5">
+                    <span class="help-text">Ex: 12% = CDI | 15% = Tesouro Direto</span>
+                </div>
+            </div>
             <button class="btn btn-primary" onclick="calcular()">
                 📊 Calcular Custos
             </button>
@@ -534,7 +548,7 @@
                             <th>Cenário</th>
                             <th>Custo Total</th>
                             <th>Custo Mensal</th>
-                            <th>Depreciação</th>
+                            <th>Depreciação/Invest</th>
                             <th>IPVA</th>
                             <th>Seguro</th>
                             <th>Manutenção</th>
@@ -734,7 +748,7 @@
         });
 
         function calcularCustoVeiculo(params) {
-            const { tipoVeiculo, valorCompra, valorRevenda, seguroAnual, manutencaoAnual, ipvaPercent, anos, financiamentoAtivo, parcelas } = params;
+            const { tipoVeiculo, valorCompra, valorRevenda, seguroAnual, manutencaoAnual, ipvaPercent, anos, financiamentoAtivo, parcelas, estrategia, taxaInvestimento } = params;
             const preset = PRESETS[tipoVeiculo];
             
             const custo = {
@@ -743,7 +757,9 @@
                 seguro: 0,
                 manutencao: 0,
                 documentacao: 0,
-                juros: 0
+                juros: 0,
+                investimento: 0,
+                custoOperacional: 0
             };
 
             for (let i = 0; i < anos; i++) {
@@ -759,7 +775,28 @@
                 custo.juros = valorCompra * taxa;
             }
 
-            const total = Object.values(custo).reduce((a, b) => a + b, 0);
+            // Custo operacional = IPVA + Seguro + Manutenção + Documentação
+            custo.custoOperacional = custo.ipva + custo.seguro + custo.manutencao + custo.documentacao + custo.juros;
+
+            // Se estratégia for "manter", calcular investimento
+            if (estrategia === 'manter') {
+                // Investir o valor do veículo e custo operacional mensalmente
+                // Simular investimento com aportes mensais
+                const taxaMensal = taxaInvestimento / 100 / 12;
+                const meses = anos * 12;
+                
+                // Valor investido inicialmente + aportes mensais do custo operacional
+                let valorInvestido = valorCompra;
+                for (let m = 1; m <= meses; m++) {
+                    valorInvestido = valorInvestido * (1 + taxaMensal) + (custo.custoOperacional / 12);
+                }
+                
+                custo.investimento = valorInvestido - valorCompra - custo.custoOperacional;
+                // Lucro do investimento = quanto ganhou a mais
+                custo.investimento = custo.investimento;
+            }
+
+            const total = custo.depreciacao + custo.custoOperacional - custo.investimento;
 
             return {
                 ...custo,
@@ -775,6 +812,7 @@
 
         function calcular() {
             const tipoVeiculo = document.getElementById('tipoVeiculo').value;
+            const estrategia = document.getElementById('estrategia').value;
             const valorCompra = parseFloat(document.getElementById('valorCompra').value) || 0;
             const valorRevenda = parseFloat(document.getElementById('valorRevenda').value) || 0;
             const seguroAnual = parseFloat(document.getElementById('seguroAnual').value) || 0;
@@ -783,11 +821,12 @@
             const documentacao = parseFloat(document.getElementById('documentacao').value) || 0;
             const financiamentoAtivo = document.getElementById('financiamentoAtivo').checked;
             const parcelas = parseInt(document.getElementById('parcelasFinanciamento').value);
+            const taxaInvestimento = parseFloat(document.getElementById('taxaInvestimento').value) || 12;
 
             const params = {
-                tipoVeiculo, valorCompra, valorRevenda, seguroAnual, manutencaoAnual,
+                tipoVeiculo, estrategia, valorCompra, valorRevenda, seguroAnual, manutencaoAnual,
                 ipvaPercent: ipvaPercent || (tipoVeiculo === 'carro' ? 2.5 : 2),
-                anos: 1, financiamentoAtivo, parcelas
+                anos: 1, financiamentoAtivo, parcelas, taxaInvestimento
             };
 
             dadosAtuais = {};
@@ -804,8 +843,8 @@
             document.getElementById('resultsCard').style.display = 'block';
 
             salvarNoHistorico({
-                tipoVeiculo, valorCompra, seguroAnual, manutencaoAnual, ipvaPercent,
-                financiamentoAtivo, parcelas, resultado: dadosAtuais
+                tipoVeiculo, estrategia, valorCompra, seguroAnual, manutencaoAnual, ipvaPercent,
+                financiamentoAtivo, parcelas, taxaInvestimento, resultado: dadosAtuais
             });
         }
 
@@ -817,11 +856,16 @@
                 const row = document.createElement('tr');
                 if (parseInt(anos) === cenarioAtual) row.classList.add('highlight');
                 
+                const estrategiaLabel = dados.investimento > 0 ? '📈 Invest' : '🔄 Troca';
+                const investimentoCell = dados.investimento > 0 
+                    ? `<td style="color: #22c55e;">+${formatCurrency(dados.investimento)}</td>` 
+                    : `<td>${formatCurrency(dados.depreciacao)}</td>`;
+                
                 row.innerHTML = `
-                    <td><strong>${anos} ${anos == 1 ? 'ano' : 'anos'}</strong></td>
+                    <td><strong>${anos} ${anos == 1 ? 'ano' : 'anos'}</strong><br><small style="color: #6b7280;">${estrategiaLabel}</small></td>
                     <td>${formatCurrency(dados.total)}</td>
                     <td>${formatCurrency(dados.mensal)}</td>
-                    <td>${formatCurrency(dados.depreciacao)}</td>
+                    ${investimentoCell}
                     <td>${formatCurrency(dados.ipva)}</td>
                     <td>${formatCurrency(dados.seguro)}</td>
                     <td>${formatCurrency(dados.manutencao)}</td>
@@ -868,16 +912,36 @@
         function atualizarGraficoPizza(anos) {
             const ctx = document.getElementById('pieChart').getContext('2d');
             const dados = dadosAtuais[anos];
+            const estrategia = document.getElementById('estrategia').value;
 
             if (pieChart) pieChart.destroy();
+
+            let labels, dataValues, colors;
+
+            if (estrategia === 'manter' && dados.investimento > 0) {
+                labels = ['Depreciação', 'IPVA', 'Seguro', 'Manutenção', 'Doc+Juros', 'Lucro Investimento'];
+                dataValues = [
+                    dados.depreciacao, 
+                    dados.ipva, 
+                    dados.seguro, 
+                    dados.manutencao, 
+                    dados.documentacao + dados.juros,
+                    dados.investimento
+                ];
+                colors = ['#2563eb', '#7c3aed', '#22c55e', '#f59e0b', '#ef4444', '#10b981'];
+            } else {
+                labels = ['Depreciação', 'IPVA', 'Seguro', 'Manutenção', 'Documentação', 'Juros'];
+                dataValues = [dados.depreciacao, dados.ipva, dados.seguro, dados.manutencao, dados.documentacao, dados.juros];
+                colors = ['#2563eb', '#7c3aed', '#22c55e', '#f59e0b', '#ef4444', '#6b7280'];
+            }
 
             pieChart = new Chart(ctx, {
                 type: 'doughnut',
                 data: {
-                    labels: ['Depreciação', 'IPVA', 'Seguro', 'Manutenção', 'Documentação', 'Juros'],
+                    labels: labels,
                     datasets: [{
-                        data: [dados.depreciacao, dados.ipva, dados.seguro, dados.manutencao, dados.documentacao, dados.juros],
-                        backgroundColor: ['#2563eb', '#7c3aed', '#22c55e', '#f59e0b', '#ef4444', '#6b7280']
+                        data: dataValues,
+                        backgroundColor: colors
                     }]
                 },
                 options: {
@@ -892,18 +956,32 @@
         }
 
         function atualizarRecomendacao() {
-            const valores = Object.entries(dadosAtuais).map(([anos, dados]) => ({ anos: parseInt(anos), total: dados.total, mensal: dados.mensal }));
+            const estrategia = document.getElementById('estrategia').value;
+            const valores = Object.entries(dadosAtuais).map(([anos, dados]) => ({ anos: parseInt(anos), total: dados.total, mensal: dados.mensal, investimento: dados.investimento }));
             const menorCusto = valores.reduce((a, b) => a.total < b.total ? a : b);
             
-            const economia = ((dadosAtuais[1].total - dadosAtuais[5].total) / dadosAtuais[1].total * 100).toFixed(0);
+            const economia = ((dadosAtuais[1].total - dadosAtuais[5].total) / Math.abs(dadosAtuais[1].total) * 100).toFixed(0);
             
             let texto = '';
-            if (menorCusto.anos === 5) {
-                texto = `Mantenha o veículo por <strong>5 anos</strong> e economize <strong>${economia}%</strong> em relação a trocar anualmente.`;
-            } else if (menorCusto.anos === 3) {
-                texto = `O melhor custo-benefício é manter por <strong>3 anos</strong>. Trocar todo ano custa ${formatCurrency(dadosAtuais[1].mensal)}/mês vs ${formatCurrency(dadosAtuais[3].mensal)}/mês.`;
+            
+            if (estrategia === 'manter') {
+                // Estratégia de manter + investir
+                const melhorInvestimento = valores.reduce((a, b) => (b.investimento || 0) > (a.investimento || 0) ? b : a);
+                if (melhorInvestimento.investimento > 0) {
+                    texto = `Manter o veículo e investir o valor gera <strong>${formatCurrency(melhorInvestimento.investimento)}</strong> de lucro em ${melhorInvestimento.anos} anos!<br>
+                    <small style="opacity: 0.8">Isso equivale a ${formatCurrency(melhorInvestimento.investimento / (melhorInvestimento.anos * 12))}/mês extras.</small>`;
+                } else {
+                    texto = `Considere manter o veículo. Os custos operacionais (IPVA + seguro + manutenção) são menores que os custos de troca.`;
+                }
             } else {
-                texto = `Considere manter pelo menos <strong>3 anos</strong> para otimizar custos.`;
+                // Estratégia de trocar
+                if (menorCusto.anos === 5) {
+                    texto = `Mantenha o veículo por <strong>5 anos</strong> e economize <strong>${economia}%</strong> em relação a trocar anualmente.`;
+                } else if (menorCusto.anos === 3) {
+                    texto = `O melhor custo-benefício é manter por <strong>3 anos</strong>. Trocar todo ano custa ${formatCurrency(dadosAtuais[1].mensal)}/mês vs ${formatCurrency(dadosAtuais[3].mensal)}/mês.`;
+                } else {
+                    texto = `Considere manter pelo menos <strong>3 anos</strong> para otimizar custos.`;
+                }
             }
             
             document.getElementById('recommendationText').innerHTML = texto;
