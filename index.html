@@ -1,14 +1,952 @@
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/Calculadora/favicon.svg" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Calculadora de Custo de Veículo</title>
-    <script type="module" crossorigin src="/Calculadora/assets/index-BQ5_I6jW.js"></script>
-    <link rel="stylesheet" crossorigin href="/Calculadora/assets/index-p9lXvqMC.css">
-  </head>
-  <body>
-    <div id="root"></div>
-  </body>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1d4ed8;
+            --success: #22c55e;
+            --warning: #f59e0b;
+            --danger: #ef4444;
+            --gray-50: #f9fafb;
+            --gray-100: #f3f4f6;
+            --gray-200: #e5e7eb;
+            --gray-300: #d1d5db;
+            --gray-400: #9ca3af;
+            --gray-500: #6b7280;
+            --gray-600: #4b5563;
+            --gray-700: #374151;
+            --gray-800: #1f2937;
+            --gray-900: #111827;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: linear-gradient(135deg, #1e3a5f 0%, #0f172a 100%);
+            min-height: 100vh;
+            color: var(--gray-800);
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            padding: 40px 0;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            opacity: 0.9;
+            font-size: 1.1rem;
+        }
+
+        .card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1), 0 2px 4px -2px rgba(0,0,0,0.1);
+        }
+
+        .card-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: var(--gray-900);
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .card-title::before {
+            content: '';
+            width: 4px;
+            height: 24px;
+            background: var(--primary);
+            border-radius: 2px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--gray-700);
+        }
+
+        .form-group input, .form-group select {
+            padding: 12px 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.2s;
+            background: var(--gray-50);
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: var(--primary);
+            background: white;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.1);
+        }
+
+        .form-group .help-text {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+        }
+
+        .checkbox-group {
+            flex-direction: row;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .checkbox-group input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            cursor: pointer;
+        }
+
+        .checkbox-group label {
+            cursor: pointer;
+        }
+
+        .btn {
+            padding: 14px 28px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: var(--primary);
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-primary:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+        }
+
+        .scenarios {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+
+        .scenario-btn {
+            padding: 16px;
+            border: 2px solid var(--gray-200);
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            text-align: center;
+            transition: all 0.2s;
+        }
+
+        .scenario-btn:hover {
+            border-color: var(--primary);
+            background: var(--gray-50);
+        }
+
+        .scenario-btn.active {
+            border-color: var(--primary);
+            background: rgba(37, 99, 235, 0.1);
+        }
+
+        .scenario-btn .years {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--gray-900);
+        }
+
+        .scenario-btn .label {
+            font-size: 0.75rem;
+            color: var(--gray-500);
+            margin-top: 4px;
+        }
+
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .results-table th, .results-table td {
+            padding: 14px 16px;
+            text-align: left;
+            border-bottom: 1px solid var(--gray-200);
+        }
+
+        .results-table th {
+            background: var(--gray-50);
+            font-weight: 600;
+            color: var(--gray-700);
+            font-size: 0.875rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .results-table tr:hover {
+            background: var(--gray-50);
+        }
+
+        .results-table .highlight {
+            background: linear-gradient(135deg, rgba(34, 197, 94, 0.1), rgba(37, 99, 235, 0.1));
+            font-weight: 600;
+        }
+
+        .charts-container {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 768px) {
+            .charts-container {
+                grid-template-columns: 1fr;
+            }
+            .scenarios {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+
+        .chart-wrapper {
+            position: relative;
+            height: 300px;
+        }
+
+        .recommendation {
+            background: linear-gradient(135deg, var(--primary), #7c3aed);
+            color: white;
+            padding: 24px;
+            border-radius: 16px;
+            margin-top: 24px;
+        }
+
+        .recommendation h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .recommendation p {
+            font-size: 1.1rem;
+            line-height: 1.6;
+        }
+
+        .recommendation strong {
+            background: rgba(255,255,255,0.2);
+            padding: 2px 8px;
+            border-radius: 4px;
+        }
+
+        .history-section {
+            margin-top: 24px;
+        }
+
+        .history-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border: 1px solid var(--gray-200);
+            border-radius: 10px;
+            margin-bottom: 12px;
+            background: var(--gray-50);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .history-item:hover {
+            border-color: var(--primary);
+            background: white;
+        }
+
+        .history-item .info {
+            flex: 1;
+        }
+
+        .history-item .info .vehicle {
+            font-weight: 600;
+            color: var(--gray-900);
+        }
+
+        .history-item .info .details {
+            font-size: 0.875rem;
+            color: var(--gray-500);
+        }
+
+        .history-item .cost {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--primary);
+        }
+
+        .history-item .delete-btn {
+            background: none;
+            border: none;
+            color: var(--gray-400);
+            cursor: pointer;
+            padding: 8px;
+            font-size: 1.25rem;
+            margin-left: 12px;
+        }
+
+        .history-item .delete-btn:hover {
+            color: var(--danger);
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 40px;
+            color: var(--gray-500);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            text-transform: uppercase;
+        }
+
+        .badge-carro {
+            background: rgba(37, 99, 235, 0.1);
+            color: var(--primary);
+        }
+
+        .badge-moto {
+            background: rgba(245, 158, 11, 0.1);
+            color: var(--warning);
+        }
+
+        .loading {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+            color: var(--gray-500);
+        }
+
+        .spinner {
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--gray-200);
+            border-top-color: var(--primary);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 8px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .cost-breakdown {
+            margin-top: 16px;
+        }
+
+        .cost-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px dashed var(--gray-200);
+        }
+
+        .cost-item:last-child {
+            border-bottom: none;
+            font-weight: 600;
+            font-size: 1.1rem;
+            padding-top: 16px;
+            border-top: 2px solid var(--gray-300);
+        }
+
+        .cost-item .label {
+            color: var(--gray-600);
+        }
+
+        .cost-item .value {
+            font-weight: 500;
+        }
+
+        .cost-item.destaque .value {
+            color: var(--primary);
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header class="header">
+            <h1>🚗 Calculadora de Custo de Veículo</h1>
+            <p>Compare o custo real de posse e troca de veículo em diferentes prazos</p>
+        </header>
+
+        <div class="card">
+            <h2 class="card-title">Dados do Veículo</h2>
+            <div class="form-grid">
+                <div class="form-group">
+                    <label>Tipo de Veículo</label>
+                    <select id="tipoVeiculo">
+                        <option value="carro">Carro</option>
+                        <option value="moto">Moto</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Marca (FIPE)</label>
+                    <select id="marcaFipe" disabled>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Modelo (FIPE)</label>
+                    <select id="modeloFipe" disabled>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Ano/Combustível (FIPE)</label>
+                    <select id="anoFipe" disabled>
+                        <option value="">Selecione...</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Valor de Compra (R$)</label>
+                    <input type="number" id="valorCompra" value="50000" min="0" step="1000">
+                </div>
+                <div class="form-group">
+                    <label>Valor de Revenda Estimado (R$)</label>
+                    <input type="number" id="valorRevenda" value="35000" min="0" step="1000">
+                    <span class="help-text">Valor estimado na venda após o período</span>
+                </div>
+                <div class="form-group">
+                    <label>Seguro Anual (R$)</label>
+                    <input type="number" id="seguroAnual" value="3000" min="0" step="100">
+                </div>
+                <div class="form-group">
+                    <label>Manutenção Anual (R$)</label>
+                    <input type="number" id="manutencaoAnual" value="2000" min="0" step="100">
+                </div>
+                <div class="form-group">
+                    <label>IPVA (% do valor)</label>
+                    <input type="number" id="ipvaPercent" value="2.5" min="0" max="10" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Documentação por Troca (R$)</label>
+                    <input type="number" id="documentacao" value="1500" min="0" step="100">
+                </div>
+                <div class="form-group checkbox-group">
+                    <input type="checkbox" id="financiamentoAtivo">
+                    <label for="financiamentoAtivo">Incluir custo de financiamento</label>
+                </div>
+                <div class="form-group" id="parcelasGroup" style="display: none;">
+                    <label>Parcelas do Financiamento</label>
+                    <select id="parcelasFinanciamento">
+                        <option value="12">12 meses (8%)</option>
+                        <option value="24">24 meses (12%)</option>
+                        <option value="36" selected>36 meses (16%)</option>
+                        <option value="48">48 meses (20%)</option>
+                        <option value="60">60 meses (24%)</option>
+                    </select>
+                </div>
+            </div>
+            <button class="btn btn-primary" onclick="calcular()">
+                📊 Calcular Custos
+            </button>
+        </div>
+
+        <div class="card" id="resultsCard" style="display: none;">
+            <h2 class="card-title">Comparativo de Cenários</h2>
+            <div class="scenarios">
+                <button class="scenario-btn active" onclick="mostrarCenario(1)">
+                    <div class="years">1</div>
+                    <div class="label">ano</div>
+                </button>
+                <button class="scenario-btn" onclick="mostrarCenario(2)">
+                    <div class="years">2</div>
+                    <div class="label">anos</div>
+                </button>
+                <button class="scenario-btn" onclick="mostrarCenario(3)">
+                    <div class="years">3</div>
+                    <div class="label">anos</div>
+                </button>
+                <button class="scenario-btn" onclick="mostrarCenario(4)">
+                    <div class="years">4</div>
+                    <div class="label">anos</div>
+                </button>
+                <button class="scenario-btn" onclick="mostrarCenario(5)">
+                    <div class="years">5</div>
+                    <div class="label">anos</div>
+                </button>
+            </div>
+
+            <div id="tabelaResultado">
+                <table class="results-table">
+                    <thead>
+                        <tr>
+                            <th>Cenário</th>
+                            <th>Custo Total</th>
+                            <th>Custo Mensal</th>
+                            <th>Depreciação</th>
+                            <th>IPVA</th>
+                            <th>Seguro</th>
+                            <th>Manutenção</th>
+                            <th>Doc+Juros</th>
+                            <th>Perda %</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tabelaCorpo">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="charts-container" style="margin-top: 24px;">
+                <div class="chart-wrapper">
+                    <canvas id="lineChart"></canvas>
+                </div>
+                <div class="chart-wrapper">
+                    <canvas id="pieChart"></canvas>
+                </div>
+            </div>
+
+            <div class="recommendation" id="recommendation">
+                <h3>💡 Recomendação</h3>
+                <p id="recommendationText"></p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2 class="card-title">Histórico de Simulações</h2>
+            <div id="historicoLista">
+                <div class="empty-state">Nenhuma simulação salva ainda</div>
+            </div>
+            <button class="btn" onclick="limparHistorico()" style="margin-top: 16px; background: var(--gray-200); color: var(--gray-700);">
+                🗑️ Limpar Histórico
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const PRESETS = {
+            carro: { ipva: 2.5, depreciacao: [20, 12, 10, 8, 8], documentacao: 1500 },
+            moto: { ipva: 2.0, depreciacao: [25, 18, 15, 12, 10], documentacao: 800 }
+        };
+
+        const TAXAS_JUROS = { 12: 0.08, 24: 0.12, 36: 0.16, 48: 0.20, 60: 0.24 };
+
+        let dadosAtuais = {};
+        let cenarioAtual = 1;
+        let lineChart = null;
+        let pieChart = null;
+
+        // FIPE API Integration
+        const API_FIPE = 'https://deividfortuna.github.io/fipe/api/v1';
+
+        async function carregarMarcas() {
+            const tipoVeiculo = document.getElementById('tipoVeiculo').value;
+            const marcaSelect = document.getElementById('marcaFipe');
+            
+            marcaSelect.innerHTML = '<option value="">Carregando...</option>';
+            marcaSelect.disabled = true;
+            document.getElementById('modeloFipe').disabled = true;
+            document.getElementById('anoFipe').disabled = true;
+
+            try {
+                const response = await fetch(`${API_FIPE}/${tipoVeiculo}/marcas`);
+                const marcas = await response.json();
+                
+                marcaSelect.innerHTML = '<option value="">Selecione a marca...</option>';
+                marcas.forEach(marca => {
+                    const option = document.createElement('option');
+                    option.value = marca.codigo;
+                    option.textContent = marca.nome;
+                    marcaSelect.appendChild(option);
+                });
+                marcaSelect.disabled = false;
+            } catch (error) {
+                marcaSelect.innerHTML = '<option value="">Erro ao carregar</option>';
+            }
+        }
+
+        async function carregarModelos() {
+            const tipoVeiculo = document.getElementById('tipoVeiculo').value;
+            const marcaCodigo = document.getElementById('marcaFipe').value;
+            const modeloSelect = document.getElementById('modeloFipe');
+            
+            if (!marcaCodigo) return;
+
+            modeloSelect.innerHTML = '<option value="">Carregando...</option>';
+            modeloSelect.disabled = true;
+            document.getElementById('anoFipe').disabled = true;
+
+            try {
+                const response = await fetch(`${API_FIPE}/${tipoVeiculo}/marcas/${marcaCodigo}/modelos`);
+                const data = await response.json();
+                
+                modeloSelect.innerHTML = '<option value="">Selecione o modelo...</option>';
+                data.modelos.forEach(modelo => {
+                    const option = document.createElement('option');
+                    option.value = modelo.codigo;
+                    option.textContent = modelo.nome;
+                    modeloSelect.appendChild(option);
+                });
+                modeloSelect.disabled = false;
+            } catch (error) {
+                modeloSelect.innerHTML = '<option value="">Erro ao carregar</option>';
+            }
+        }
+
+        async function carregarAnos() {
+            const tipoVeiculo = document.getElementById('tipoVeiculo').value;
+            const marcaCodigo = document.getElementById('marcaFipe').value;
+            const modeloCodigo = document.getElementById('modeloFipe').value;
+            const anoSelect = document.getElementById('anoFipe');
+            
+            if (!modeloCodigo) return;
+
+            anoSelect.innerHTML = '<option value="">Carregando...</option>';
+            anoSelect.disabled = true;
+
+            try {
+                const response = await fetch(`${API_FIPE}/${tipoVeiculo}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos`);
+                const anos = await response.json();
+                
+                anoSelect.innerHTML = '<option value="">Selecione o ano...</option>';
+                anos.forEach(ano => {
+                    const option = document.createElement('option');
+                    option.value = ano.codigo;
+                    option.textContent = ano.nome;
+                    anoSelect.appendChild(option);
+                });
+                anoSelect.disabled = false;
+            } catch (error) {
+                anoSelect.innerHTML = '<option value="">Erro ao carregar</option>';
+            }
+        }
+
+        async function buscarValorFipe() {
+            const tipoVeiculo = document.getElementById('tipoVeiculo').value;
+            const marcaCodigo = document.getElementById('marcaFipe').value;
+            const modeloCodigo = document.getElementById('modeloFipe').value;
+            const anoCodigo = document.getElementById('anoFipe').value;
+
+            if (!anoCodigo) return;
+
+            try {
+                const response = await fetch(`${API_FIPE}/${tipoVeiculo}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos/${anoCodigo}`);
+                const dados = await response.json();
+                
+                if (dados.Valor) {
+                    const valor = parseFloat(dados.Valor.replace(/[R$\s]/g, '').replace(',', '.'));
+                    document.getElementById('valorCompra').value = valor;
+                    document.getElementById('valorRevenda').value = Math.round(valor * 0.45);
+                }
+            } catch (error) {
+                console.error('Erro ao buscar valor FIPE:', error);
+            }
+        }
+
+        document.getElementById('tipoVeiculo').addEventListener('change', carregarMarcas);
+        document.getElementById('marcaFipe').addEventListener('change', carregarModelos);
+        document.getElementById('modeloFipe').addEventListener('change', carregarAnos);
+        document.getElementById('anoFipe').addEventListener('change', buscarValorFipe);
+        document.getElementById('financiamentoAtivo').addEventListener('change', function() {
+            document.getElementById('parcelasGroup').style.display = this.checked ? 'block' : 'none';
+        });
+
+        function calcularCustoVeiculo(params) {
+            const { tipoVeiculo, valorCompra, valorRevenda, seguroAnual, manutencaoAnual, ipvaPercent, anos, financiamentoAtivo, parcelas } = params;
+            const preset = PRESETS[tipoVeiculo];
+            
+            const custo = {
+                depreciacao: valorCompra - valorRevenda,
+                ipva: 0,
+                seguro: 0,
+                manutencao: 0,
+                documentacao: 0,
+                juros: 0
+            };
+
+            for (let i = 0; i < anos; i++) {
+                custo.ipva += (valorCompra - (custo.depreciacao / anos) * i) * (ipvaPercent / 100);
+                custo.seguro += seguroAnual;
+                custo.manutencao += manutencaoAnual;
+            }
+
+            custo.documentacao = preset.documentacao * (anos > 1 ? 2 : 1);
+            
+            if (financiamentoAtivo) {
+                const taxa = TAXAS_JUROS[parcelas] || 0.16;
+                custo.juros = valorCompra * taxa;
+            }
+
+            const total = Object.values(custo).reduce((a, b) => a + b, 0);
+
+            return {
+                ...custo,
+                total,
+                mensal: total / (anos * 12),
+                perdaPercent: ((total - (valorCompra - valorRevenda)) / (valorCompra - valorRevenda) * 100)
+            };
+        }
+
+        function formatCurrency(value) {
+            return new Intl.NumberFormat('pt-BR', { style: 'currency', currency: 'BRL' }).format(value);
+        }
+
+        function calcular() {
+            const tipoVeiculo = document.getElementById('tipoVeiculo').value;
+            const valorCompra = parseFloat(document.getElementById('valorCompra').value) || 0;
+            const valorRevenda = parseFloat(document.getElementById('valorRevenda').value) || 0;
+            const seguroAnual = parseFloat(document.getElementById('seguroAnual').value) || 0;
+            const manutencaoAnual = parseFloat(document.getElementById('manutencaoAnual').value) || 0;
+            const ipvaPercent = parseFloat(document.getElementById('ipvaPercent').value) || 2.5;
+            const documentacao = parseFloat(document.getElementById('documentacao').value) || 0;
+            const financiamentoAtivo = document.getElementById('financiamentoAtivo').checked;
+            const parcelas = parseInt(document.getElementById('parcelasFinanciamento').value);
+
+            const params = {
+                tipoVeiculo, valorCompra, valorRevenda, seguroAnual, manutencaoAnual,
+                ipvaPercent: ipvaPercent || (tipoVeiculo === 'carro' ? 2.5 : 2),
+                anos: 1, financiamentoAtivo, parcelas
+            };
+
+            dadosAtuais = {};
+            for (let i = 1; i <= 5; i++) {
+                params.anos = i;
+                dadosAtuais[i] = calcularCustoVeiculo(params);
+            }
+
+            atualizarTabela();
+            atualizarGraficoLinha();
+            atualizarGraficoPizza(cenarioAtual);
+            atualizarRecomendacao();
+            
+            document.getElementById('resultsCard').style.display = 'block';
+
+            salvarNoHistorico({
+                tipoVeiculo, valorCompra, seguroAnual, manutencaoAnual, ipvaPercent,
+                financiamentoAtivo, parcelas, resultado: dadosAtuais
+            });
+        }
+
+        function atualizarTabela() {
+            const tbody = document.getElementById('tabelaCorpo');
+            tbody.innerHTML = '';
+
+            Object.entries(dadosAtuais).forEach(([anos, dados]) => {
+                const row = document.createElement('tr');
+                if (parseInt(anos) === cenarioAtual) row.classList.add('highlight');
+                
+                row.innerHTML = `
+                    <td><strong>${anos} ${anos == 1 ? 'ano' : 'anos'}</strong></td>
+                    <td>${formatCurrency(dados.total)}</td>
+                    <td>${formatCurrency(dados.mensal)}</td>
+                    <td>${formatCurrency(dados.depreciacao)}</td>
+                    <td>${formatCurrency(dados.ipva)}</td>
+                    <td>${formatCurrency(dados.seguro)}</td>
+                    <td>${formatCurrency(dados.manutencao)}</td>
+                    <td>${formatCurrency(dados.documentacao + dados.juros)}</td>
+                    <td>${dados.perdaPercent.toFixed(0)}%</td>
+                `;
+                row.onclick = () => mostrarCenario(parseInt(anos));
+                row.style.cursor = 'pointer';
+                tbody.appendChild(row);
+            });
+        }
+
+        function mostrarCenario(anos) {
+            cenarioAtual = anos;
+            document.querySelectorAll('.scenario-btn').forEach((btn, index) => {
+                btn.classList.toggle('active', index + 1 === anos);
+            });
+            atualizarGraficoPizza(anos);
+        }
+
+        function atualizarGraficoLinha() {
+            const ctx = document.getElementById('lineChart').getContext('2d');
+            
+            if (lineChart) lineChart.destroy();
+            
+            const anos = [1, 2, 3, 4, 5];
+            const datasets = [
+                { label: 'Custo Total Acumulado', data: anos.map(a => dadosAtuais[a].total), borderColor: '#2563eb', backgroundColor: 'rgba(37, 99, 235, 0.1)', fill: true, tension: 0.4 },
+                { label: 'Custo Mensal', data: anos.map(a => dadosAtuais[a].mensal), borderColor: '#22c55e', backgroundColor: 'rgba(34, 197, 94, 0.1)', fill: true, tension: 0.4 }
+            ];
+
+            lineChart = new Chart(ctx, {
+                type: 'line',
+                data: { labels: ['1 ano', '2 anos', '3 anos', '4 anos', '5 anos'], datasets },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { title: { display: true, text: 'Evolução de Custo' }, legend: { position: 'top' } },
+                    scales: { y: { ticks: { callback: value => formatCurrency(value) } } }
+                }
+            });
+        }
+
+        function atualizarGraficoPizza(anos) {
+            const ctx = document.getElementById('pieChart').getContext('2d');
+            const dados = dadosAtuais[anos];
+
+            if (pieChart) pieChart.destroy();
+
+            pieChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Depreciação', 'IPVA', 'Seguro', 'Manutenção', 'Documentação', 'Juros'],
+                    datasets: [{
+                        data: [dados.depreciacao, dados.ipva, dados.seguro, dados.manutencao, dados.documentacao, dados.juros],
+                        backgroundColor: ['#2563eb', '#7c3aed', '#22c55e', '#f59e0b', '#ef4444', '#6b7280']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { 
+                        title: { display: true, text: `Breakdown - ${anos} ${anos == 1 ? 'ano' : 'anos'}` },
+                        legend: { position: 'right' } 
+                    }
+                }
+            });
+        }
+
+        function atualizarRecomendacao() {
+            const valores = Object.entries(dadosAtuais).map(([anos, dados]) => ({ anos: parseInt(anos), total: dados.total, mensal: dados.mensal }));
+            const menorCusto = valores.reduce((a, b) => a.total < b.total ? a : b);
+            
+            const economia = ((dadosAtuais[1].total - dadosAtuais[5].total) / dadosAtuais[1].total * 100).toFixed(0);
+            
+            let texto = '';
+            if (menorCusto.anos === 5) {
+                texto = `Mantenha o veículo por <strong>5 anos</strong> e economize <strong>${economia}%</strong> em relação a trocar anualmente.`;
+            } else if (menorCusto.anos === 3) {
+                texto = `O melhor custo-benefício é manter por <strong>3 anos</strong>. Trocar todo ano custa ${formatCurrency(dadosAtuais[1].mensal)}/mês vs ${formatCurrency(dadosAtuais[3].mensal)}/mês.`;
+            } else {
+                texto = `Considere manter pelo menos <strong>3 anos</strong> para otimizar custos.`;
+            }
+            
+            document.getElementById('recommendationText').innerHTML = texto;
+        }
+
+        // Histórico com LocalStorage
+        function salvarNoHistorico(dados) {
+            const historico = JSON.parse(localStorage.getItem('historicoCalculadora') || '[]');
+            historico.unshift({ ...dados, data: new Date().toISOString(), id: Date.now() });
+            if (historico.length > 10) historico.pop();
+            localStorage.setItem('historicoCalculadora', JSON.stringify(historico));
+            renderizarHistorico();
+        }
+
+        function renderizarHistorico() {
+            const historico = JSON.parse(localStorage.getItem('historicoCalculadora') || '[]');
+            const container = document.getElementById('historicoLista');
+            
+            if (historico.length === 0) {
+                container.innerHTML = '<div class="empty-state">Nenhuma simulação salva ainda</div>';
+                return;
+            }
+
+            container.innerHTML = historico.map(item => `
+                <div class="history-item" onclick="carregarDoHistorico(${item.id})">
+                    <div class="info">
+                        <span class="badge badge-${item.tipoVeiculo}">${item.tipoVeiculo === 'carro' ? '🚗 Carro' : '🏍️ Moto'}</span>
+                        <div class="vehicle">${formatCurrency(item.valorCompra)}</div>
+                        <div class="details">${item.tipoVeiculo === 'carro' ? 'IPVA ' + item.ipvaPercent + '%' : ''} | Seguro R$${item.seguroAnual}/ano | ${item.financiamentoAtivo ? 'Financiado ' + item.parcelas + 'x' : 'À vista'}</div>
+                    </div>
+                    <div class="cost">${formatCurrency(item.resultado[5].total)}</div>
+                    <button class="delete-btn" onclick="event.stopPropagation(); excluirHistorico(${item.id})">×</button>
+                </div>
+            `).join('');
+        }
+
+        function carregarDoHistorico(id) {
+            const historico = JSON.parse(localStorage.getItem('historicoCalculadora') || '[]');
+            const item = historico.find(h => h.id === id);
+            if (!item) return;
+
+            document.getElementById('tipoVeiculo').value = item.tipoVeiculo;
+            document.getElementById('valorCompra').value = item.valorCompra;
+            document.getElementById('seguroAnual').value = item.seguroAnual;
+            document.getElementById('manutencaoAnual').value = item.manutencaoAnual;
+            document.getElementById('ipvaPercent').value = item.ipvaPercent;
+            document.getElementById('financiamentoAtivo').checked = item.financiamentoAtivo;
+            document.getElementById('parcelas').value = item.parcelas;
+            document.getElementById('parcelasGroup').style.display = item.financiamentoAtivo ? 'block' : 'none';
+
+            dadosAtuais = item.resultado;
+            atualizarTabela();
+            atualizarGraficoLinha();
+            atualizarGraficoPizza(cenarioAtual);
+            atualizarRecomendacao();
+            document.getElementById('resultsCard').style.display = 'block';
+        }
+
+        function excluirHistorico(id) {
+            let historico = JSON.parse(localStorage.getItem('historicoCalculadora') || '[]');
+            historico = historico.filter(h => h.id !== id);
+            localStorage.setItem('historicoCalculadora', JSON.stringify(historico));
+            renderizarHistorico();
+        }
+
+        function limparHistorico() {
+            if (confirm('Tem certeza que deseja limpar todo o histórico?')) {
+                localStorage.removeItem('historicoCalculadora');
+                renderizarHistorico();
+            }
+        }
+
+        // Inicialização
+        carregarMarcas();
+        renderizarHistorico();
+    </script>
+</body>
 </html>
