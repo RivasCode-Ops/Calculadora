@@ -465,59 +465,77 @@
                         <option value="">Selecione...</option>
                     </select>
                 </div>
-                <div class="form-group checkbox-group">
-                    <input type="checkbox" id="temFinanciamento">
-                    <label for="temFinanciamento">Financiamento ativo (valor pendente)</label>
-                </div>
-                <div class="form-group" id="valorFinanciamentoGroup" style="display: none;">
-                    <label>Valor Pendente do Financiamento (R$)</label>
-                    <input type="number" id="valorFinanciamento" value="0" min="0" step="1000">
-                    <span class="help-text">Valor restante a pagar do financiamento atual</span>
-                </div>
                 <div class="form-group">
-                    <label>Valor de Compra (R$)</label>
-                    <input type="number" id="valorCompra" value="50000" min="0" step="1000">
-                </div>
-                <div class="form-group">
-                    <label>Valor de Revenda Estimado (R$)</label>
-                    <input type="number" id="valorRevenda" value="35000" min="0" step="1000">
-                    <span class="help-text">Valor estimado na venda após o período</span>
-                </div>
-                <div class="form-group">
-                    <label>Seguro Anual (R$)</label>
-                    <input type="number" id="seguroAnual" value="3000" min="0" step="100">
-                </div>
-                <div class="form-group">
-                    <label>Manutenção Anual (R$)</label>
-                    <input type="number" id="manutencaoAnual" value="2000" min="0" step="100">
-                </div>
-                <div class="form-group">
-                    <label>IPVA (% do valor)</label>
-                    <input type="number" id="ipvaPercent" value="2.5" min="0" max="10" step="0.1">
-                </div>
-                <div class="form-group">
-                    <label>Documentação por Troca (R$)</label>
-                    <input type="number" id="documentacao" value="1500" min="0" step="100">
-                </div>
-                <div class="form-group checkbox-group">
-                    <input type="checkbox" id="financiamentoAtivo">
-                    <label for="financiamentoAtivo">Incluir custo de financiamento</label>
-                </div>
-                <div class="form-group" id="parcelasGroup" style="display: none;">
-                    <label>Parcelas do Financiamento</label>
-                    <select id="parcelasFinanciamento">
-                        <option value="12">12 meses (8%)</option>
-                        <option value="24">24 meses (12%)</option>
-                        <option value="36" selected>36 meses (16%)</option>
-                        <option value="48">48 meses (20%)</option>
-                        <option value="60">60 meses (24%)</option>
-                    </select>
+                    <label>Valor FIPE do Veículo Novo (R$)</label>
+                    <input type="number" id="valorFipe" value="50000" min="0" step="1000" readonly>
+                    <span class="help-text">Valor da tabela FIPE (auto-preenchido)</span>
                 </div>
             </div>
-                <div class="form-group">
-                    <label>Taxa de Retorno Anual (%)</label>
-                    <input type="number" id="taxaInvestimento" value="12" min="0" max="30" step="0.5">
-                    <span class="help-text">Ex: 12% = CDI | 15% = Tesouro Direto</span>
+
+            <div class="card" style="background: #f0f9ff; border: 2px solid #0ea5e9;">
+                <h2 class="card-title" style="color: #0369a1;">💰 Entradas e Negociação</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>🎁 Veículo na Entrada (Troca)</label>
+                        <input type="number" id="valorEntradaVeiculo" value="0" min="0" step="1000">
+                        <span class="help-text">Valor do seu veículo usado dado na troca</span>
+                    </div>
+                    <div class="form-group">
+                        <label>💵 Dinheiro complementar entrada (R$)</label>
+                        <input type="number" id="valorEntradaDinheiro" value="0" min="0" step="1000">
+                        <span class="help-text">Dinheiro追加 no ato da compra</span>
+                    </div>
+                    <div class="form-group checkbox-group">
+                        <input type="checkbox" id="temFinanciamento">
+                        <label for="temFinanciamento">Financiar o veículo novo?</label>
+                    </div>
+                    <div class="form-group" id="valorFinanciamentoGroup" style="display: none;">
+                        <label>Valor Financiado (R$)</label>
+                        <input type="number" id="valorFinanciamento" value="0" min="0" step="1000">
+                        <span class="help-text">Valor que será financiado</span>
+                    </div>
+                    <div class="form-group" id="parcelasGroup" style="display: none;">
+                        <label>Parcelas do Financiamento</label>
+                        <select id="parcelasFinanciamento">
+                            <option value="12">12 meses (8%)</option>
+                            <option value="24">24 meses (12%)</option>
+                            <option value="36" selected>36 meses (16%)</option>
+                            <option value="48">48 meses (20%)</option>
+                            <option value="60">60 meses (24%)</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2 class="card-title">Custos Operacionais</h2>
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Valor de Venda do Usado (R$)</label>
+                        <input type="number" id="valorVendaUsado" value="35000" min="0" step="1000">
+                        <span class="help-text">Quanto espera vender seu veículo usado (pode ser ± FIPE)</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Seguro Anual (R$)</label>
+                        <input type="number" id="seguroAnual" value="3000" min="0" step="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Manutenção Anual (R$)</label>
+                        <input type="number" id="manutencaoAnual" value="2000" min="0" step="100">
+                    </div>
+                    <div class="form-group">
+                        <label>IPVA (% do valor)</label>
+                        <input type="number" id="ipvaPercent" value="2.5" min="0" max="10" step="0.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Documentação por Troca (R$)</label>
+                        <input type="number" id="documentacao" value="1500" min="0" step="100">
+                    </div>
+                    <div class="form-group">
+                        <label>Taxa de Retorno Anual (%)</label>
+                        <input type="number" id="taxaInvestimento" value="12" min="0" max="30" step="0.5">
+                        <span class="help-text">Ex: 12% = CDI | 15% = Tesouro Direto</span>
+                    </div>
                 </div>
             </div>
             <button class="btn btn-primary" onclick="calcular()">
@@ -557,12 +575,13 @@
                             <th>Cenário</th>
                             <th>Custo Total</th>
                             <th>Custo Mensal</th>
+                            <th>Custo Veículo</th>
+                            <th>Recuperação</th>
                             <th>Depreciação/Invest</th>
                             <th>IPVA</th>
                             <th>Seguro</th>
                             <th>Manutenção</th>
                             <th>Doc+Juros</th>
-                            <th>Financ. Pendente</th>
                             <th>Perda %</th>
                         </tr>
                     </thead>
@@ -734,9 +753,12 @@
                     // Remove pontos de milhar e substitui vírgula por ponto
                     const valor = parseFloat(valorStr.replace(/\./g, '').replace(',', '.'));
                     if (!isNaN(valor) && valor > 0) {
-                        document.getElementById('valorCompra').value = valor;
-                        // Estimar revenda: 45% do valor para 5 anos
-                        document.getElementById('valorRevenda').value = Math.round(valor * 0.45);
+                        // Preencher valor FIPE (veículo novo)
+                        document.getElementById('valorFipe').value = valor;
+                        // Estimar venda do usado (90% do FIPE - depreciação inicial)
+                        document.getElementById('valorVendaUsado').value = Math.round(valor * 0.90);
+                        // Valor de entrada do veículo (estimado em 70% do FIPE)
+                        document.getElementById('valorEntradaVeiculo').value = Math.round(valor * 0.70);
                     }
                 }
             } catch (error) {
@@ -761,68 +783,87 @@
             document.getElementById('valorFinanciamentoGroup').style.display = this.checked ? 'block' : 'none';
         });
 
-        function calcularCustoVeiculo(params) {
-            const { tipoVeiculo, valorCompra, valorRevenda, seguroAnual, manutencaoAnual, ipvaPercent, anos, financiamentoAtivo, parcelas, estrategia, taxaInvestimento, valorPendente } = params;
+function calcularCustoVeiculo(params) {
+            const { 
+                tipoVeiculo, estrategia, 
+                valorFipe, // Valor do veículo novo (FIPE)
+                valorEntradaVeiculo, // Valor do veículo usado na troca
+                valorEntradaDinheiro, // Dinheiro追加 na entrada
+                valorVendaUsado, // Valor de venda do usado
+                seguroAnual, manutencaoAnual, ipvaPercent, anos, 
+                financiamentoAtivo, parcelas, taxaInvestimento 
+            } = params;
             const preset = PRESETS[tipoVeiculo];
             
+            // Custo líquido do veículo novo = valor FIPE - entrada (veículo + dinheiro)
+            const custoVeiculoNovo = valorFipe - valorEntradaVeiculo - valorEntradaDinheiro;
+            
+            // Se financiar, adicionar juros
+            let custoJuros = 0;
+            if (financiamentoAtivo && custoVeiculoNovo > 0) {
+                const taxa = TAXAS_JUROS[parcelas] || 0.16;
+                custoJuros = custoVeiculoNovo * taxa;
+            }
+            
             const custo = {
-                depreciacao: valorCompra - valorRevenda,
+                custoVeiculo: custoVeiculoNovo,
+                depreciacao: 0, // Depreciação do veículo novo
                 ipva: 0,
                 seguro: 0,
                 manutencao: 0,
-                documentacao: 0,
-                juros: 0,
+                documentacao: preset.documentacao * 2, // Troca = documentação do novo + venda do usado
+                juros: custoJuros,
                 investimento: 0,
                 custoOperacional: 0,
-                financiamentoPendente: 0
+                recuperacaoVenda: 0
             };
 
-            // Se tem financiamento pendente, adiciona ao custo (valor que já deve)
-            if (valorPendente > 0) {
-                custo.financiamentoPendente = valorPendente;
-            }
-
+            // Calcular depreciação do veículo novo
             for (let i = 0; i < anos; i++) {
-                custo.ipva += (valorCompra - (custo.depreciacao / anos) * i) * (ipvaPercent / 100);
+                const taxaDep = preset.depreciacao[Math.min(i, 4)];
+                custo.depreciacao += valorFipe * taxaDep;
+            }
+            
+            // IPVA, seguro, manutenção sobre o veículo novo
+            for (let i = 0; i < anos; i++) {
+                custo.ipva += (valorFipe - (custo.depreciacao / anos) * i) * (ipvaPercent / 100);
                 custo.seguro += seguroAnual;
                 custo.manutencao += manutencaoAnual;
             }
 
-            custo.documentacao = preset.documentacao * (anos > 1 ? 2 : 1);
+            // Custo operacional = documentação + IPVA + seguro + manutenção + juros
+            custo.custoOperacional = custo.documentacao + custo.ipva + custo.seguro + custo.manutencao + custo.juros;
+
+            // Recuperação = valor de venda do usado
+            custo.recuperacaoVenda = valorVendaUsado;
+
+            // Custo total considerando recuperação
+            // Custo líquido do veículo + custos operacionais - recuperação da venda
+            const custoBase = custoVeiculoNovo + custo.custoOperacional - custo.recuperacaoVenda;
             
-            if (financiamentoAtivo) {
-                const taxa = TAXAS_JUROS[parcelas] || 0.16;
-                custo.juros = valorCompra * taxa;
-            }
-
-            // Custo operacional = IPVA + Seguro + Manutenção + Documentação
-            custo.custoOperacional = custo.ipva + custo.seguro + custo.manutencao + custo.documentacao + custo.juros;
-
             // Se estratégia for "manter", calcular investimento
-            if (estrategia === 'manter') {
-                // Investir o valor do veículo e custo operacional mensalmente
-                // Simular investimento com aportes mensais
+            if (estrategia === 'manter' && custoBase > 0) {
                 const taxaMensal = taxaInvestimento / 100 / 12;
                 const meses = anos * 12;
                 
-                // Valor investido inicialmente + aportes mensais do custo operacional
-                let valorInvestido = valorCompra;
+                // Investir o custo base
+                let valorInvestido = custoBase;
                 for (let m = 1; m <= meses; m++) {
-                    valorInvestido = valorInvestido * (1 + taxaMensal) + (custo.custoOperacional / 12);
+                    valorInvestido = valorInvestido * (1 + taxaMensal);
                 }
                 
-                custo.investimento = valorInvestido - valorCompra - custo.custoOperacional;
-                // Lucro do investimento = quanto ganhou a mais
-                custo.investimento = custo.investimento;
+                custo.investimento = valorInvestido - custoBase;
             }
 
-            const total = custo.depreciacao + custo.custoOperacional - custo.investimento + custo.financiamentoPendente;
+            const total = custoBase - custo.investimento;
+            const custoMensal = total > 0 ? total / (anos * 12) : 0;
+            const custoBasePercent = ((custoBase - (valorFipe - valorVendaUsado)) / (valorFipe - valorVendaUsado) * 100);
 
             return {
                 ...custo,
-                total,
-                mensal: total / (anos * 12),
-                perdaPercent: ((total - (valorCompra - valorRevenda)) / (valorCompra - valorRevenda) * 100)
+                total: Math.max(0, total),
+                mensal: Math.max(0, custoMensal),
+                perdaPercent: isNaN(custoBasePercent) ? 0 : custoBasePercent
             };
         }
 
@@ -833,22 +874,26 @@
         function calcular() {
             const tipoVeiculo = document.getElementById('tipoVeiculo').value;
             const estrategia = document.getElementById('estrategia').value;
-            const valorCompra = parseFloat(document.getElementById('valorCompra').value) || 0;
-            const valorRevenda = parseFloat(document.getElementById('valorRevenda').value) || 0;
+            const valorFipe = parseFloat(document.getElementById('valorFipe').value) || 0;
+            const valorEntradaVeiculo = parseFloat(document.getElementById('valorEntradaVeiculo').value) || 0;
+            const valorEntradaDinheiro = parseFloat(document.getElementById('valorEntradaDinheiro').value) || 0;
+            const valorVendaUsado = parseFloat(document.getElementById('valorVendaUsado').value) || 0;
             const seguroAnual = parseFloat(document.getElementById('seguroAnual').value) || 0;
             const manutencaoAnual = parseFloat(document.getElementById('manutencaoAnual').value) || 0;
             const ipvaPercent = parseFloat(document.getElementById('ipvaPercent').value) || 2.5;
-            const documentacao = parseFloat(document.getElementById('documentacao').value) || 0;
-            const financiamentoAtivo = document.getElementById('financiamentoAtivo').checked;
+            const financiamentoAtivo = document.getElementById('temFinanciamento').checked;
             const parcelas = parseInt(document.getElementById('parcelasFinanciamento').value);
             const taxaInvestimento = parseFloat(document.getElementById('taxaInvestimento').value) || 12;
-            const temFinanciamento = document.getElementById('temFinanciamento').checked;
-            const valorPendente = temFinanciamento ? (parseFloat(document.getElementById('valorFinanciamento').value) || 0) : 0;
 
             const params = {
-                tipoVeiculo, estrategia, valorCompra, valorRevenda, seguroAnual, manutencaoAnual,
+                tipoVeiculo, estrategia,
+                valorFipe,
+                valorEntradaVeiculo,
+                valorEntradaDinheiro,
+                valorVendaUsado,
+                seguroAnual, manutencaoAnual,
                 ipvaPercent: ipvaPercent || (tipoVeiculo === 'carro' ? 2.5 : 2),
-                anos: 1, financiamentoAtivo, parcelas, taxaInvestimento, valorPendente
+                anos: 1, financiamentoAtivo, parcelas, taxaInvestimento
             };
 
             dadosAtuais = {};
@@ -865,7 +910,8 @@
             document.getElementById('resultsCard').style.display = 'block';
 
             salvarNoHistorico({
-                tipoVeiculo, estrategia, valorCompra, seguroAnual, manutencaoAnual, ipvaPercent,
+                tipoVeiculo, estrategia, valorFipe, valorEntradaVeiculo, valorEntradaDinheiro,
+                valorVendaUsado, seguroAnual, manutencaoAnual, ipvaPercent,
                 financiamentoAtivo, parcelas, taxaInvestimento, resultado: dadosAtuais
             });
         }
@@ -883,20 +929,27 @@
                     ? `<td style="color: #22c55e;">+${formatCurrency(dados.investimento)}</td>` 
                     : `<td>${formatCurrency(dados.depreciacao)}</td>`;
                 
-                const financiamentoCell = dados.financiamentoPendente > 0
-                    ? `<td style="color: #ec4899; font-weight: 600;">${formatCurrency(dados.financiamentoPendente)}</td>`
+                // Custo líquido do veículo novo
+                const custoVeiculoCell = dados.custoVeiculo > 0 
+                    ? `<td style="color: #ef4444;">${formatCurrency(dados.custoVeiculo)}</td>`
+                    : `<td style="color: #22c55e;">${formatCurrency(dados.custoVeiculo)}</td>`;
+                
+                // Recuperação da venda do usado
+                const recuperacaoCell = dados.recuperacaoVenda > 0
+                    ? `<td style="color: #22c55e;">+${formatCurrency(dados.recuperacaoVenda)}</td>`
                     : `<td>-</td>`;
                 
                 row.innerHTML = `
                     <td><strong>${anos} ${anos == 1 ? 'ano' : 'anos'}</strong><br><small style="color: #6b7280;">${estrategiaLabel}</small></td>
                     <td>${formatCurrency(dados.total)}</td>
                     <td>${formatCurrency(dados.mensal)}</td>
+                    ${custoVeiculoCell}
+                    ${recuperacaoCell}
                     ${investimentoCell}
                     <td>${formatCurrency(dados.ipva)}</td>
                     <td>${formatCurrency(dados.seguro)}</td>
                     <td>${formatCurrency(dados.manutencao)}</td>
                     <td>${formatCurrency(dados.documentacao + dados.juros)}</td>
-                    ${financiamentoCell}
                     <td>${dados.perdaPercent.toFixed(0)}%</td>
                 `;
                 row.onclick = () => mostrarCenario(parseInt(anos));
