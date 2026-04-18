@@ -586,12 +586,18 @@
         let lineChart = null;
         let pieChart = null;
 
-        // FIPE API Integration
-        const API_FIPE = 'https://deividfortuna.github.io/fipe/api/v1';
+        // FIPE API Integration - Nova URL com arquivos JSON
+        const API_FIPE = 'https://deividfortuna.github.io/fipe';
+
+        const FIPE_TYPES = {
+            'carro': 'carros',
+            'moto': 'motos'
+        };
 
         async function carregarMarcas() {
             const tipoVeiculo = document.getElementById('tipoVeiculo').value;
             const marcaSelect = document.getElementById('marcaFipe');
+            const tipo = FIPE_TYPES[tipoVeiculo];
             
             marcaSelect.innerHTML = '<option value="">Carregando...</option>';
             marcaSelect.disabled = true;
@@ -599,10 +605,12 @@
             document.getElementById('anoFipe').disabled = true;
 
             try {
-                const response = await fetch(`${API_FIPE}/${tipoVeiculo}/marcas`);
+                const response = await fetch(`${API_FIPE}/${tipo}/marcas.json`);
+                if (!response.ok) throw new Error('Erro na API');
                 const marcas = await response.json();
                 
                 marcaSelect.innerHTML = '<option value="">Selecione a marca...</option>';
+                marcas.sort((a, b) => a.nome.localeCompare(b.nome));
                 marcas.forEach(marca => {
                     const option = document.createElement('option');
                     option.value = marca.codigo;
@@ -611,6 +619,7 @@
                 });
                 marcaSelect.disabled = false;
             } catch (error) {
+                console.error('Erro carregarMarcas:', error);
                 marcaSelect.innerHTML = '<option value="">Erro ao carregar</option>';
             }
         }
@@ -619,6 +628,7 @@
             const tipoVeiculo = document.getElementById('tipoVeiculo').value;
             const marcaCodigo = document.getElementById('marcaFipe').value;
             const modeloSelect = document.getElementById('modeloFipe');
+            const tipo = FIPE_TYPES[tipoVeiculo];
             
             if (!marcaCodigo) return;
 
@@ -627,11 +637,13 @@
             document.getElementById('anoFipe').disabled = true;
 
             try {
-                const response = await fetch(`${API_FIPE}/${tipoVeiculo}/marcas/${marcaCodigo}/modelos`);
-                const data = await response.json();
+                const response = await fetch(`${API_FIPE}/${tipo}/marcas/${marcaCodigo}/modelos.json`);
+                if (!response.ok) throw new Error('Erro na API');
+                const modelos = await response.json();
                 
                 modeloSelect.innerHTML = '<option value="">Selecione o modelo...</option>';
-                data.modelos.forEach(modelo => {
+                modelos.sort((a, b) => a.nome.localeCompare(b.nome));
+                modelos.forEach(modelo => {
                     const option = document.createElement('option');
                     option.value = modelo.codigo;
                     option.textContent = modelo.nome;
@@ -639,6 +651,7 @@
                 });
                 modeloSelect.disabled = false;
             } catch (error) {
+                console.error('Erro carregarModelos:', error);
                 modeloSelect.innerHTML = '<option value="">Erro ao carregar</option>';
             }
         }
@@ -648,6 +661,7 @@
             const marcaCodigo = document.getElementById('marcaFipe').value;
             const modeloCodigo = document.getElementById('modeloFipe').value;
             const anoSelect = document.getElementById('anoFipe');
+            const tipo = FIPE_TYPES[tipoVeiculo];
             
             if (!modeloCodigo) return;
 
@@ -655,11 +669,13 @@
             anoSelect.disabled = true;
 
             try {
-                const response = await fetch(`${API_FIPE}/${tipoVeiculo}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos`);
+                const response = await fetch(`${API_FIPE}/${tipo}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos.json`);
+                if (!response.ok) throw new Error('Erro na API');
                 const anos = await response.json();
                 
                 anoSelect.innerHTML = '<option value="">Selecione o ano...</option>';
-                anos.forEach(ano => {
+                // Inverter para mostrar anos mais recentes primeiro
+                anos.reverse().forEach(ano => {
                     const option = document.createElement('option');
                     option.value = ano.codigo;
                     option.textContent = ano.nome;
@@ -667,6 +683,7 @@
                 });
                 anoSelect.disabled = false;
             } catch (error) {
+                console.error('Erro carregarAnos:', error);
                 anoSelect.innerHTML = '<option value="">Erro ao carregar</option>';
             }
         }
@@ -676,24 +693,37 @@
             const marcaCodigo = document.getElementById('marcaFipe').value;
             const modeloCodigo = document.getElementById('modeloFipe').value;
             const anoCodigo = document.getElementById('anoFipe').value;
+            const tipo = FIPE_TYPES[tipoVeiculo];
 
             if (!anoCodigo) return;
 
             try {
-                const response = await fetch(`${API_FIPE}/${tipoVeiculo}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos/${anoCodigo}`);
+                const response = await fetch(`${API_FIPE}/${tipo}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos/${anoCodigo}.json`);
+                if (!response.ok) throw new Error('Erro na API');
                 const dados = await response.json();
                 
                 if (dados.Valor) {
-                    const valor = parseFloat(dados.Valor.replace(/[R$\s]/g, '').replace(',', '.'));
-                    document.getElementById('valorCompra').value = valor;
-                    document.getElementById('valorRevenda').value = Math.round(valor * 0.45);
+                    // Converter "R$ 80.000,00" para número
+                    const valorStr = dados.Valor.replace('R$ ', '').trim();
+                    // Remove pontos de milhar e substitui vírgula por ponto
+                    const valor = parseFloat(valorStr.replace(/\./g, '').replace(',', '.'));
+                    if (!isNaN(valor) && valor > 0) {
+                        document.getElementById('valorCompra').value = valor;
+                        // Estimar revenda: 45% do valor para 5 anos
+                        document.getElementById('valorRevenda').value = Math.round(valor * 0.45);
+                    }
                 }
             } catch (error) {
-                console.error('Erro ao buscar valor FIPE:', error);
+                console.error('Erro buscarValorFipe:', error);
             }
         }
 
-        document.getElementById('tipoVeiculo').addEventListener('change', carregarMarcas);
+        document.getElementById('tipoVeiculo').addEventListener('change', function() {
+            // Reset IPVA based on vehicle type
+            const ipvaInput = document.getElementById('ipvaPercent');
+            ipvaInput.value = this.value === 'carro' ? 2.5 : 2.0;
+            carregarMarcas();
+        });
         document.getElementById('marcaFipe').addEventListener('change', carregarModelos);
         document.getElementById('modeloFipe').addEventListener('change', carregarAnos);
         document.getElementById('anoFipe').addEventListener('change', buscarValorFipe);
