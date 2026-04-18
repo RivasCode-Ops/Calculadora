@@ -586,8 +586,8 @@
         let lineChart = null;
         let pieChart = null;
 
-        // FIPE API Integration - Nova URL com arquivos JSON
-        const API_FIPE = 'https://deividfortuna.github.io/fipe';
+        // FIPE API Integration - Nova URL correta
+        const API_FIPE = 'https://parallelum.com.br/fipe/api/v1';
 
         const FIPE_TYPES = {
             'carro': 'carros',
@@ -605,7 +605,7 @@
             document.getElementById('anoFipe').disabled = true;
 
             try {
-                const response = await fetch(`${API_FIPE}/${tipo}/marcas.json`);
+                const response = await fetch(`${API_FIPE}/${tipo}/marcas`);
                 if (!response.ok) throw new Error('Erro na API');
                 const marcas = await response.json();
                 
@@ -620,7 +620,7 @@
                 marcaSelect.disabled = false;
             } catch (error) {
                 console.error('Erro carregarMarcas:', error);
-                marcaSelect.innerHTML = '<option value="">Erro ao carregar</option>';
+                marcaSelect.innerHTML = '<option value="">API indisponível</option>';
             }
         }
 
@@ -637,11 +637,13 @@
             document.getElementById('anoFipe').disabled = true;
 
             try {
-                const response = await fetch(`${API_FIPE}/${tipo}/marcas/${marcaCodigo}/modelos.json`);
+                const response = await fetch(`${API_FIPE}/${tipo}/marcas/${marcaCodigo}/modelos`);
                 if (!response.ok) throw new Error('Erro na API');
-                const modelos = await response.json();
+                const data = await response.json();
                 
                 modeloSelect.innerHTML = '<option value="">Selecione o modelo...</option>';
+                // Ordenar modelos
+                const modelos = data.modelos || [];
                 modelos.sort((a, b) => a.nome.localeCompare(b.nome));
                 modelos.forEach(modelo => {
                     const option = document.createElement('option');
@@ -669,7 +671,7 @@
             anoSelect.disabled = true;
 
             try {
-                const response = await fetch(`${API_FIPE}/${tipo}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos.json`);
+                const response = await fetch(`${API_FIPE}/${tipo}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos`);
                 if (!response.ok) throw new Error('Erro na API');
                 const anos = await response.json();
                 
@@ -698,7 +700,7 @@
             if (!anoCodigo) return;
 
             try {
-                const response = await fetch(`${API_FIPE}/${tipo}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos/${anoCodigo}.json`);
+                const response = await fetch(`${API_FIPE}/${tipo}/marcas/${marcaCodigo}/modelos/${modeloCodigo}/anos/${anoCodigo}`);
                 if (!response.ok) throw new Error('Erro na API');
                 const dados = await response.json();
                 
